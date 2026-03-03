@@ -229,7 +229,7 @@ print(xml.decode()
 ## Contributing
 
 ```bash
-git clone https://github.com/lalitpatel/dict2xml.git
+git clone https://github.com/lalitpatel/pydict2xml.git
 cd dict2xml
 pip install -e ".[dev]"
 pytest

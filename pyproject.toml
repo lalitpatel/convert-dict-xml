@@ -37,9 +37,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lalitpatel/dict2xml"
-Repository = "https://github.com/lalitpatel/dict2xml"
-Issues = "https://github.com/lalitpatel/dict2xml/issues"
+Homepage = "https://github.com/lalitpatel/pydict2xml"
+Repository = "https://github.com/lalitpatel/pydict2xml"
+Issues = "https://github.com/lalitpatel/pydict2xml/issues"
 
 [tool.hatch.version]
 path = "src/pydict2xml/__init__.py"
