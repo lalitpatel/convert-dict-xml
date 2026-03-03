@@ -1,4 +1,0 @@
-click==8.1.5
-first==2.0.2
-lxml==4.9.3
-pip-tools==7.0.0

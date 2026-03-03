@@ -103,3 +103,6 @@ ENV/
 #IntelliJ
 .idea/
 *.iml
+
+# pytest
+.pytest_cache/
