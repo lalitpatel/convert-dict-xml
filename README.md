@@ -52,6 +52,13 @@ result = XML2Dict(xml).to_dict()
 # {'@attributes': {'type': 'fiction'}, 'book': ['1984', 'Foundation']}
 ```
 
+For namespaced XML, use `strip_namespaces=True` to get clean dict keys:
+```python
+xml = b'<feed xmlns="http://www.w3.org/2005/Atom"><title>Blog</title></feed>'
+result = XML2Dict(xml, strip_namespaces=True).to_dict()
+# {'title': 'Blog'}
+```
+
 ## Dict Conventions
 
 Use special keys to control XML output:
@@ -214,12 +221,13 @@ print(xml.decode()
 | `to_xml_string(encoding='UTF-8', pretty_print=True, xml_declaration=True)` | XML as `bytes` |
 | `get_etree_object()` | The underlying `lxml.etree.Element` |
 
-### `XML2Dict(xml, ns_clean=True)`
+### `XML2Dict(xml, ns_clean=True, strip_namespaces=False)`
 
 | Parameter | Description |
 |-----------|-------------|
 | `xml` | XML string or bytes to parse |
-| `ns_clean` | Remove namespace prefixes (default `True`) |
+| `ns_clean` | Clean up redundant namespace declarations (default `True`) |
+| `strip_namespaces` | Remove namespace URIs from tag names in the output dict (default `False`) |
 
 | Method | Returns |
 |--------|---------|

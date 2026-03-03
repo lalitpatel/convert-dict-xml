@@ -169,17 +169,43 @@ class TestInvalidXml:
 
 
 class TestNamespaces:
-    def test_namespaced_elements(self):
-        # ns_clean removes redundant namespace declarations but URIs remain in tag names
+    def test_namespaced_elements_preserved_by_default(self):
         xml = b'<root xmlns:ns="http://example.com"><ns:child>value</ns:child></root>'
         result = XML2Dict(xml).to_dict()
         assert "{http://example.com}child" in result
         assert result["{http://example.com}child"] == "value"
 
-    def test_default_namespace(self):
+    def test_default_namespace_preserved(self):
         xml = b'<root xmlns="http://example.com"><child>value</child></root>'
         result = XML2Dict(xml).to_dict()
         assert "{http://example.com}child" in result
+
+    def test_strip_namespaces_prefixed(self):
+        xml = b'<root xmlns:ns="http://example.com"><ns:child>value</ns:child></root>'
+        result = XML2Dict(xml, strip_namespaces=True).to_dict()
+        assert "child" in result
+        assert result["child"] == "value"
+
+    def test_strip_namespaces_default_ns(self):
+        xml = b'<root xmlns="http://example.com"><child>value</child></root>'
+        result = XML2Dict(xml, strip_namespaces=True).to_dict()
+        assert "child" in result
+        assert result["child"] == "value"
+
+    def test_strip_namespaces_nested(self):
+        xml = b"""<root xmlns:ns="http://example.com">
+            <ns:parent><ns:child>deep</ns:child></ns:parent>
+        </root>"""
+        result = XML2Dict(xml, strip_namespaces=True).to_dict()
+        assert "parent" in result
+        assert result["parent"]["child"] == "deep"
+
+    def test_strip_namespaces_with_attributes(self):
+        xml = b'<root xmlns:ns="http://example.com"><ns:book type="fiction">1984</ns:book></root>'
+        result = XML2Dict(xml, strip_namespaces=True).to_dict()
+        assert "book" in result
+        assert result["book"]["@attributes"]["type"] == "fiction"
+        assert result["book"]["@text"] == "1984"
 
 
 class TestOrderedDictNested:

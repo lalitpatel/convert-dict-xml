@@ -1,8 +1,11 @@
 """Convert XML to a Python dictionary using lxml."""
 
+import re
 from collections import OrderedDict
 
 from lxml import etree
+
+_NS_PATTERN = re.compile(r'\{[^}]+\}')
 
 
 class XML2Dict:
@@ -11,13 +14,17 @@ class XML2Dict:
     For more info see: http://lxml.de/tutorial.html
     """
 
-    def __init__(self, xml, ns_clean=True):
+    def __init__(self, xml, ns_clean=True, strip_namespaces=False):
         """
         :param xml: XML string or bytes to parse
-        :param ns_clean: remove namespace prefixes. Default True
+        :param ns_clean: passed to lxml's XMLParser to clean up redundant
+            namespace declarations. Does not affect tag names in the output dict.
+        :param strip_namespaces: if True, remove namespace URIs from tag names
+            (e.g. "{http://example.com}child" becomes "child"). Default False.
         """
         parser = etree.XMLParser(ns_clean=ns_clean, remove_blank_text=True)
         self._xml = etree.XML(xml, parser)
+        self._strip_namespaces = strip_namespaces
 
     def to_dict(self, ordered_dict=False):
         """
@@ -32,6 +39,17 @@ class XML2Dict:
         """Return the underlying lxml.etree.Element."""
         return self._xml
 
+    def _tag_name(self, tag):
+        """
+        Return the tag name, stripping namespace URI if strip_namespaces is enabled.
+
+        :param tag: tag string, potentially with namespace like "{uri}name"
+        :return: cleaned tag name
+        """
+        if self._strip_namespaces:
+            return _NS_PATTERN.sub('', tag)
+        return tag
+
     def _convert(self, node, ordered_dict=False):
         """
         Recursively convert an XML node to a dictionary.
@@ -44,17 +62,18 @@ class XML2Dict:
 
         # add attributes and text nodes
         if len(node.attrib):
-            xml_dict['@attributes'] = node.attrib
+            xml_dict['@attributes'] = dict(node.attrib)
         if node.text:
             xml_dict['@text'] = node.text
 
         # add children if any
         if len(node):
             for child in node:
-                if child.tag not in xml_dict:
+                tag = self._tag_name(child.tag)
+                if tag not in xml_dict:
                     # collect children into a list; single-element lists are flattened below
-                    xml_dict[child.tag] = []
-                xml_dict[child.tag].append(self._convert(child, ordered_dict))
+                    xml_dict[tag] = []
+                xml_dict[tag].append(self._convert(child, ordered_dict))
 
             # flatten single-element lists
             for key, value in xml_dict.items():
